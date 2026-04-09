@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface ExportButtonProps {
   data: any[];
@@ -10,6 +11,8 @@ interface ExportButtonProps {
 }
 
 export function ExportCSVButton({ data, filename, columns }: ExportButtonProps) {
+  const { t } = useTranslation();
+
   const handleExport = () => {
     if (!data.length) return;
     const header = columns.map((c) => c.label).join(",");
@@ -33,7 +36,7 @@ export function ExportCSVButton({ data, filename, columns }: ExportButtonProps) 
 
   return (
     <Button variant="outline" size="sm" onClick={handleExport} disabled={!data.length}>
-      <Download className="mr-2 h-3 w-3" />Esporta CSV
+      <Download className="mr-2 h-3 w-3" />{t("common.export_csv")}
     </Button>
   );
 }
@@ -45,6 +48,7 @@ interface ImportCSVButtonProps {
 
 export function ImportCSVButton({ onImport, columns }: ImportCSVButtonProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,7 +59,7 @@ export function ImportCSVButton({ onImport, columns }: ImportCSVButtonProps) {
         const text = ev.target?.result as string;
         const lines = text.split("\n").filter((l) => l.trim());
         if (lines.length < 2) {
-          toast({ title: "File vuoto o non valido", variant: "destructive" });
+          toast({ title: t("common.error"), variant: "destructive" });
           return;
         }
         const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
@@ -69,9 +73,9 @@ export function ImportCSVButton({ onImport, columns }: ImportCSVButtonProps) {
           return row;
         });
         onImport(rows);
-        toast({ title: `${rows.length} righe importate` });
+        toast({ title: t("import.rows_imported", { count: rows.length }) });
       } catch {
-        toast({ title: "Errore nel parsing del file", variant: "destructive" });
+        toast({ title: t("common.error"), variant: "destructive" });
       }
     };
     reader.readAsText(file);
@@ -81,7 +85,7 @@ export function ImportCSVButton({ onImport, columns }: ImportCSVButtonProps) {
   return (
     <Button variant="outline" size="sm" asChild>
       <label className="cursor-pointer">
-        <Upload className="mr-2 h-3 w-3" />Importa CSV
+        <Upload className="mr-2 h-3 w-3" />{t("common.import_csv")}
         <input type="file" accept=".csv" className="hidden" onChange={handleFile} />
       </label>
     </Button>

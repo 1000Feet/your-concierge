@@ -9,22 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Star, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 import { ProviderAvailabilityCalendar } from "@/components/ProviderAvailabilityCalendar";
 import { format } from "date-fns";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  tour: "Tour", chef: "Chef", transfer: "Transfer", yacht: "Yacht",
-  surf: "Surf", babysitter: "Babysitter", restaurant: "Ristorante", wellness: "Wellness", other: "Altro",
-};
-
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "In attesa", color: "bg-muted text-muted-foreground" },
-  contacted: { label: "Contattato", color: "bg-blue-100 text-blue-800" },
-  accepted: { label: "Accettato", color: "bg-green-100 text-green-800" },
-  declined: { label: "Rifiutato", color: "bg-red-100 text-red-800" },
-};
+import { useTranslation } from "react-i18next";
 
 const ProviderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: provider, isLoading } = useQuery({
     queryKey: ["provider", id],
@@ -49,8 +39,8 @@ const ProviderDetail = () => {
     enabled: !!id,
   });
 
-  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Caricamento...</div>;
-  if (!provider) return <div className="flex items-center justify-center h-64 text-muted-foreground">Fornitore non trovato</div>;
+  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">{t("common.loading")}</div>;
+  if (!provider) return <div className="flex items-center justify-center h-64 text-muted-foreground">{t("providers.not_found")}</div>;
 
   const totalAssignments = assignments?.length ?? 0;
   const accepted = assignments?.filter((a) => a.status === "accepted").length ?? 0;
@@ -67,14 +57,14 @@ const ProviderDetail = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-heading font-bold">{provider.name}</h1>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">{CATEGORY_LABELS[provider.category] ?? provider.category}</Badge>
+            <Badge variant="secondary">{t(`service_types.${provider.category}`, provider.category)}</Badge>
             <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <Star className="h-3 w-3 fill-accent text-accent" />{provider.reliability}/10
             </span>
             {provider.is_active ? (
-              <Badge className="bg-green-100 text-green-800">Attivo</Badge>
+              <Badge className="bg-green-100 text-green-800">{t("providers.active")}</Badge>
             ) : (
-              <Badge variant="destructive">Inattivo</Badge>
+              <Badge variant="destructive">{t("providers.inactive")}</Badge>
             )}
           </div>
         </div>
@@ -82,14 +72,14 @@ const ProviderDetail = () => {
 
       <Tabs defaultValue="availability">
         <TabsList>
-          <TabsTrigger value="availability">Disponibilità</TabsTrigger>
-          <TabsTrigger value="history">Storico Richieste</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="availability">{t("providers.availability")}</TabsTrigger>
+          <TabsTrigger value="history">{t("providers.request_history")}</TabsTrigger>
+          <TabsTrigger value="performance">{t("providers.performance")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="availability" className="mt-4">
           <Card>
-            <CardHeader><CardTitle className="text-lg">Calendario Disponibilità</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-lg">{t("providers.availability_calendar")}</CardTitle></CardHeader>
             <CardContent>
               <ProviderAvailabilityCalendar providerId={id!} />
             </CardContent>
@@ -102,33 +92,35 @@ const ProviderDetail = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Richiesta</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Prezzo</TableHead>
-                    <TableHead>Stato</TableHead>
+                    <TableHead>{t("requests.title")}</TableHead>
+                    <TableHead>{t("requests.client")}</TableHead>
+                    <TableHead>{t("common.date")}</TableHead>
+                    <TableHead>{t("requests.quoted_price")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {!assignments?.length ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nessuna richiesta</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t("providers.no_requests")}</TableCell></TableRow>
                   ) : (
-                    assignments.map((a) => {
-                      const s = STATUS_LABELS[a.status];
-                      return (
-                        <TableRow key={a.id}>
-                          <TableCell className="font-medium text-sm">{a.requests?.description?.slice(0, 40)}</TableCell>
-                          <TableCell className="text-sm">
-                            {a.requests?.clients ? `${a.requests.clients.first_name} ${a.requests.clients.last_name}` : "—"}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {a.requests?.service_date ? format(new Date(a.requests.service_date), "dd/MM/yyyy") : "—"}
-                          </TableCell>
-                          <TableCell className="text-sm">{a.quoted_price ? `€${Number(a.quoted_price).toFixed(0)}` : "—"}</TableCell>
-                          <TableCell><Badge className={s?.color ?? ""}>{s?.label ?? a.status}</Badge></TableCell>
-                        </TableRow>
-                      );
-                    })
+                    assignments.map((a) => (
+                      <TableRow key={a.id}>
+                        <TableCell className="font-medium text-sm">{a.requests?.description?.slice(0, 40)}</TableCell>
+                        <TableCell className="text-sm">
+                          {a.requests?.clients ? `${a.requests.clients.first_name} ${a.requests.clients.last_name}` : "—"}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {a.requests?.service_date ? format(new Date(a.requests.service_date), "dd/MM/yyyy") : "—"}
+                        </TableCell>
+                        <TableCell className="text-sm">{a.quoted_price ? `€${Number(a.quoted_price).toFixed(0)}` : "—"}</TableCell>
+                        <TableCell><Badge className={
+                          a.status === "accepted" ? "bg-green-100 text-green-800" :
+                          a.status === "declined" ? "bg-red-100 text-red-800" :
+                          a.status === "contacted" ? "bg-blue-100 text-blue-800" :
+                          "bg-muted text-muted-foreground"
+                        }>{t(`provider_status.${a.status}`)}</Badge></TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
               </Table>
@@ -141,7 +133,7 @@ const ProviderDetail = () => {
             <Card>
               <CardContent className="pt-6 text-center">
                 <p className="text-2xl font-bold">{totalAssignments}</p>
-                <p className="text-sm text-muted-foreground">Totale Richieste</p>
+                <p className="text-sm text-muted-foreground">{t("providers.total_requests")}</p>
               </CardContent>
             </Card>
             <Card>
@@ -150,7 +142,7 @@ const ProviderDetail = () => {
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <p className="text-2xl font-bold">{acceptRate}%</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Tasso Accettazione</p>
+                <p className="text-sm text-muted-foreground">{t("providers.acceptance_rate")}</p>
               </CardContent>
             </Card>
             <Card>
@@ -159,7 +151,7 @@ const ProviderDetail = () => {
                   <XCircle className="h-5 w-5 text-destructive" />
                   <p className="text-2xl font-bold">{declined}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Rifiutate</p>
+                <p className="text-sm text-muted-foreground">{t("providers.declined")}</p>
               </CardContent>
             </Card>
             <Card>
@@ -168,7 +160,7 @@ const ProviderDetail = () => {
                   <TrendingUp className="h-5 w-5 text-accent" />
                   <p className="text-2xl font-bold">€{totalRevenue.toFixed(0)}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">Revenue Totale</p>
+                <p className="text-sm text-muted-foreground">{t("providers.total_revenue")}</p>
               </CardContent>
             </Card>
           </div>

@@ -3,22 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  client_proposal: "Proposta Cliente",
-  provider_inquiry: "Richiesta Fornitore",
-  follow_up: "Follow-up",
-  confirmation: "Conferma",
-  cancellation: "Cancellazione",
-  welcome: "Benvenuto",
-  other: "Altro",
-};
+import { useTranslation } from "react-i18next";
 
 interface Props {
   onSelect: (body: string) => void;
 }
 
 export function MessageTemplateSelector({ onSelect }: Props) {
+  const { t } = useTranslation();
+
   const { data: templates } = useQuery({
     queryKey: ["message-templates"],
     queryFn: async () => {
@@ -27,9 +20,9 @@ export function MessageTemplateSelector({ onSelect }: Props) {
     },
   });
 
-  const grouped = templates?.reduce<Record<string, typeof templates>>((acc, t) => {
-    const cat = t.category as string;
-    (acc[cat] ??= []).push(t);
+  const grouped = templates?.reduce<Record<string, typeof templates>>((acc, tmpl) => {
+    const cat = tmpl.category as string;
+    (acc[cat] ??= []).push(tmpl);
     return acc;
   }, {}) ?? {};
 
@@ -44,11 +37,11 @@ export function MessageTemplateSelector({ onSelect }: Props) {
         {Object.entries(grouped).map(([cat, items], idx) => (
           <div key={cat}>
             {idx > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuLabel>{CATEGORY_LABELS[cat] ?? cat}</DropdownMenuLabel>
+            <DropdownMenuLabel>{t(`template_categories.${cat}`, cat)}</DropdownMenuLabel>
             <DropdownMenuGroup>
-              {items.map((t) => (
-                <DropdownMenuItem key={t.id} onClick={() => onSelect(t.body)}>
-                  {t.name}
+              {items.map((tmpl) => (
+                <DropdownMenuItem key={tmpl.id} onClick={() => onSelect(tmpl.body)}>
+                  {tmpl.name}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
