@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, ClipboardList, BarChart3, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Building2, ClipboardList, BarChart3, Settings, LogOut, MessageSquare } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ const items = [
   { title: "Clienti", url: "/clients", icon: Users },
   { title: "Fornitori", url: "/providers", icon: Building2 },
   { title: "Richieste", url: "/requests", icon: ClipboardList },
+  { title: "Messaggi", url: "/messages", icon: MessageSquare },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Impostazioni", url: "/settings", icon: Settings },
 ];

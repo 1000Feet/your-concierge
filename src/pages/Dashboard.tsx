@@ -5,6 +5,7 @@ import { Users, Building2, ClipboardList, TrendingUp, Calendar, Clock } from "lu
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { DailySummary } from "@/components/DailySummary";
 
 const Dashboard = () => {
   const { data: clients } = useQuery({
@@ -75,6 +76,8 @@ const Dashboard = () => {
         <h1 className="text-2xl font-heading font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground">Panoramica della tua attività di concierge</p>
       </div>
+
+      <DailySummary />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
