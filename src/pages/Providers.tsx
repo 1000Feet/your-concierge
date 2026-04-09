@@ -15,26 +15,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Trash2, Edit, Star, Upload } from "lucide-react";
 import { ExportCSVButton } from "@/components/ExcelImportExport";
 import { ImportDialog } from "@/components/ImportDialog";
+import { useTranslation } from "react-i18next";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProviderCategory = Database["public"]["Enums"]["provider_category"];
-
-const CATEGORIES: { value: ProviderCategory; label: string }[] = [
-  { value: "tour", label: "Tour" },
-  { value: "chef", label: "Chef" },
-  { value: "transfer", label: "Transfer" },
-  { value: "yacht", label: "Yacht" },
-  { value: "surf", label: "Surf" },
-  { value: "babysitter", label: "Babysitter" },
-  { value: "restaurant", label: "Ristorante" },
-  { value: "wellness", label: "Wellness" },
-  { value: "other", label: "Altro" },
-];
 
 const Providers = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -43,6 +33,18 @@ const Providers = () => {
     name: "", category: "other" as ProviderCategory, email: "", phone: "",
     reliability: "5", commission_pct: "0", notes: "",
   });
+
+  const CATEGORIES: { value: ProviderCategory; label: string }[] = [
+    { value: "tour", label: t("service_types.tour") },
+    { value: "chef", label: t("service_types.chef") },
+    { value: "transfer", label: t("service_types.transfer") },
+    { value: "yacht", label: t("service_types.yacht") },
+    { value: "surf", label: t("service_types.surf") },
+    { value: "babysitter", label: t("service_types.babysitter") },
+    { value: "restaurant", label: t("service_types.restaurant") },
+    { value: "wellness", label: t("service_types.wellness") },
+    { value: "other", label: t("service_types.other") },
+  ];
 
   const { data: providers, isLoading } = useQuery({
     queryKey: ["providers"],
@@ -56,14 +58,9 @@ const Providers = () => {
   const saveMutation = useMutation({
     mutationFn: async (values: typeof form) => {
       const payload = {
-        name: values.name,
-        category: values.category,
-        email: values.email || null,
-        phone: values.phone || null,
-        reliability: parseInt(values.reliability),
-        commission_pct: parseFloat(values.commission_pct),
-        notes: values.notes || null,
-        user_id: user!.id,
+        name: values.name, category: values.category, email: values.email || null,
+        phone: values.phone || null, reliability: parseInt(values.reliability),
+        commission_pct: parseFloat(values.commission_pct), notes: values.notes || null, user_id: user!.id,
       };
       if (editingProvider) {
         const { error } = await supabase.from("providers").update(payload).eq("id", editingProvider.id);
@@ -77,9 +74,9 @@ const Providers = () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: editingProvider ? "Fornitore aggiornato" : "Fornitore aggiunto" });
+      toast({ title: editingProvider ? t("providers.provider_updated") : t("providers.provider_added") });
     },
-    onError: (err: any) => toast({ title: "Errore", description: err.message, variant: "destructive" }),
+    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -89,7 +86,7 @@ const Providers = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
-      toast({ title: "Fornitore eliminato" });
+      toast({ title: t("providers.provider_deleted") });
     },
   });
 
@@ -115,83 +112,83 @@ const Providers = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-bold">Fornitori</h1>
-          <p className="text-muted-foreground">Gestisci i tuoi fornitori di servizi</p>
+          <h1 className="text-2xl font-heading font-bold">{t("providers.title")}</h1>
+          <p className="text-muted-foreground">{t("providers.subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <ExportCSVButton
             data={filtered ?? []}
-            filename="fornitori"
+            filename={t("providers.title").toLowerCase()}
             columns={[
-              { key: "name", label: "Nome" },
-              { key: "category", label: "Categoria" },
-              { key: "email", label: "Email" },
-              { key: "phone", label: "Telefono" },
-              { key: "reliability", label: "Affidabilità" },
-              { key: "commission_pct", label: "Commissione %" },
+              { key: "name", label: t("common.name") },
+              { key: "category", label: t("common.category") },
+              { key: "email", label: t("common.email") },
+              { key: "phone", label: t("common.phone") },
+              { key: "reliability", label: t("providers.reliability") },
+              { key: "commission_pct", label: t("providers.commission_pct") },
             ]}
           />
           <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
-            <Upload className="mr-2 h-3 w-3" />Importa
+            <Upload className="mr-2 h-3 w-3" />{t("common.import")}
           </Button>
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Nuovo Fornitore</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{editingProvider ? "Modifica Fornitore" : "Nuovo Fornitore"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
-              <div className="space-y-1">
-                <Label>Nome *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              </div>
-              <div className="space-y-1">
-                <Label>Categoria</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as ProviderCategory })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+            <DialogTrigger asChild>
+              <Button><Plus className="mr-2 h-4 w-4" />{t("providers.new_provider")}</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{editingProvider ? t("providers.edit_provider") : t("providers.new_provider")}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
                 <div className="space-y-1">
-                  <Label>Email</Label>
-                  <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                  <Label>{t("common.name")} *</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                 </div>
                 <div className="space-y-1">
-                  <Label>Telefono</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  <Label>{t("common.category")}</Label>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as ProviderCategory })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>{t("common.email")}</Label>
+                    <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>{t("common.phone")}</Label>
+                    <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>{t("providers.reliability_range")}</Label>
+                    <Input type="number" min="1" max="10" value={form.reliability} onChange={(e) => setForm({ ...form, reliability: e.target.value })} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>{t("providers.commission_pct")}</Label>
+                    <Input type="number" step="0.01" value={form.commission_pct} onChange={(e) => setForm({ ...form, commission_pct: e.target.value })} />
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <Label>Affidabilità (1-10)</Label>
-                  <Input type="number" min="1" max="10" value={form.reliability} onChange={(e) => setForm({ ...form, reliability: e.target.value })} />
+                  <Label>{t("common.notes")}</Label>
+                  <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
-                <div className="space-y-1">
-                  <Label>Commissione %</Label>
-                  <Input type="number" step="0.01" value={form.commission_pct} onChange={(e) => setForm({ ...form, commission_pct: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label>Note</Label>
-                <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-              </div>
-              <Button type="submit" className="w-full" disabled={saveMutation.isPending}>
-                {editingProvider ? "Aggiorna" : "Aggiungi"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <Button type="submit" className="w-full" disabled={saveMutation.isPending}>
+                  {editingProvider ? t("common.update") : t("common.add")}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Cerca fornitori..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        <Input placeholder={t("providers.search_placeholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
       </div>
 
       <Card>
@@ -199,19 +196,19 @@ const Providers = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Affidabilità</TableHead>
-                <TableHead>Commissione</TableHead>
-                <TableHead>Contatto</TableHead>
+                <TableHead>{t("common.name")}</TableHead>
+                <TableHead>{t("common.category")}</TableHead>
+                <TableHead>{t("providers.reliability")}</TableHead>
+                <TableHead>{t("providers.commission")}</TableHead>
+                <TableHead>{t("providers.contact")}</TableHead>
                 <TableHead className="w-20"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Caricamento...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{t("common.loading")}</TableCell></TableRow>
               ) : filtered?.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nessun fornitore trovato</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{t("providers.no_providers")}</TableCell></TableRow>
               ) : (
                 filtered?.map((p) => (
                   <TableRow key={p.id}>
@@ -231,12 +228,8 @@ const Providers = () => {
                     <TableCell className="text-sm">{p.email ?? p.phone ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(p.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -249,25 +242,22 @@ const Providers = () => {
       <ImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
-        title="Importa Fornitori"
+        title={t("providers.import_providers")}
         columns={[
-          { key: "name", label: "Nome" },
-          { key: "category", label: "Categoria" },
-          { key: "email", label: "Email" },
-          { key: "phone", label: "Telefono" },
-          { key: "reliability", label: "Affidabilità" },
-          { key: "commission_pct", label: "Commissione %" },
+          { key: "name", label: t("common.name") },
+          { key: "category", label: t("common.category") },
+          { key: "email", label: t("common.email") },
+          { key: "phone", label: t("common.phone") },
+          { key: "reliability", label: t("providers.reliability") },
+          { key: "commission_pct", label: t("providers.commission_pct") },
         ]}
         requiredKeys={["name"]}
         onImport={async (rows) => {
           for (const row of rows) {
             await supabase.from("providers").insert({
-              name: row.name,
-              category: (row.category as ProviderCategory) || "other",
-              email: row.email || null,
-              phone: row.phone || null,
-              reliability: parseInt(row.reliability) || 5,
-              commission_pct: parseFloat(row.commission_pct) || 0,
+              name: row.name, category: (row.category as ProviderCategory) || "other",
+              email: row.email || null, phone: row.phone || null,
+              reliability: parseInt(row.reliability) || 5, commission_pct: parseFloat(row.commission_pct) || 0,
               user_id: user!.id,
             });
           }
