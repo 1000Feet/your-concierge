@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit, Eye } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Eye, Upload } from "lucide-react";
 import { ExportCSVButton } from "@/components/ExcelImportExport";
+import { ImportDialog } from "@/components/ImportDialog";
 import { format } from "date-fns";
 
 const Clients = () => {
@@ -21,6 +22,7 @@ const Clients = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
   const [form, setForm] = useState({
     first_name: "", last_name: "", email: "", phone: "",
@@ -117,6 +119,9 @@ const Clients = () => {
               { key: "departure_date", label: "Partenza" },
             ]}
           />
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+            <Upload className="mr-2 h-3 w-3" />Importa
+          </Button>
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuovo Cliente</Button>
