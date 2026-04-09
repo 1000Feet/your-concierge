@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit, Eye } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Eye, Sparkles, Download } from "lucide-react";
 import { format } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -158,7 +158,40 @@ const Requests = () => {
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
               <div className="space-y-1">
-                <Label>Descrizione *</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Descrizione *</Label>
+                  {!editingRequest && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      onClick={async () => {
+                        if (!form.description) return;
+                        try {
+                          const { data, error } = await supabase.functions.invoke("ai-extract", {
+                            body: { text: form.description },
+                          });
+                          if (error) throw error;
+                          const ex = data.extracted ?? {};
+                          setForm((f: typeof form) => ({
+                            ...f,
+                            service_type: ex.service_type ?? f.service_type,
+                            description: ex.description ?? f.description,
+                            group_size: ex.group_size?.toString() ?? f.group_size,
+                            budget: ex.budget?.toString() ?? f.budget,
+                            service_date: ex.service_date ?? f.service_date,
+                          }));
+                          toast({ title: "Dati estratti con AI" });
+                        } catch {
+                          toast({ title: "Errore estrazione AI", variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Sparkles className="mr-1 h-3 w-3" />AI Extract
+                    </Button>
+                  )}
+                </div>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required rows={2} />
               </div>
               <div className="grid grid-cols-2 gap-3">
