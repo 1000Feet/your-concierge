@@ -215,7 +215,9 @@ const Providers = () => {
               ) : (
                 filtered?.map((p) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link to={`/providers/${p.id}`} className="hover:text-primary hover:underline">{p.name}</Link>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary">{CATEGORIES.find((c) => c.value === p.category)?.label ?? p.category}</Badge>
                     </TableCell>
@@ -244,6 +246,34 @@ const Providers = () => {
           </Table>
         </CardContent>
       </Card>
+      <ImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Importa Fornitori"
+        columns={[
+          { key: "name", label: "Nome" },
+          { key: "category", label: "Categoria" },
+          { key: "email", label: "Email" },
+          { key: "phone", label: "Telefono" },
+          { key: "reliability", label: "Affidabilità" },
+          { key: "commission_pct", label: "Commissione %" },
+        ]}
+        requiredKeys={["name"]}
+        onImport={async (rows) => {
+          for (const row of rows) {
+            await supabase.from("providers").insert({
+              name: row.name,
+              category: (row.category as ProviderCategory) || "other",
+              email: row.email || null,
+              phone: row.phone || null,
+              reliability: parseInt(row.reliability) || 5,
+              commission_pct: parseFloat(row.commission_pct) || 0,
+              user_id: user!.id,
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ["providers"] });
+        }}
+      />
     </div>
   );
 };
