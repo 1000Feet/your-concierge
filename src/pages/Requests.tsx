@@ -276,6 +276,7 @@ const Requests = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="flex gap-3 items-center">
