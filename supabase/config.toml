@@ -1,1 +1,4 @@
 project_id = "sfxiqeafdtqiqnxdqmfk"
+
+[auth]
+site_url = "https://id-preview--d089735c-6a03-4fd3-8509-e6ee735eeba2.lovable.app"
