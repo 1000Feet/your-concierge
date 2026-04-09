@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Trash2, Edit, Eye } from "lucide-react";
+import { ExportCSVButton } from "@/components/ExcelImportExport";
 import { format } from "date-fns";
 
 const Clients = () => {
@@ -102,7 +103,21 @@ const Clients = () => {
           <h1 className="text-2xl font-heading font-bold">Clienti</h1>
           <p className="text-muted-foreground">Gestisci i tuoi clienti</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+        <div className="flex gap-2">
+          <ExportCSVButton
+            data={filtered ?? []}
+            filename="clienti"
+            columns={[
+              { key: "first_name", label: "Nome" },
+              { key: "last_name", label: "Cognome" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Telefono" },
+              { key: "hotel", label: "Hotel" },
+              { key: "arrival_date", label: "Arrivo" },
+              { key: "departure_date", label: "Partenza" },
+            ]}
+          />
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuovo Cliente</Button>
           </DialogTrigger>
