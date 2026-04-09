@@ -37,6 +37,7 @@ const Providers = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<any>(null);
   const [form, setForm] = useState({
     name: "", category: "other" as ProviderCategory, email: "", phone: "",
@@ -120,6 +121,19 @@ const Providers = () => {
         <div className="flex gap-2">
           <ExportCSVButton
             data={filtered ?? []}
+            filename="fornitori"
+            columns={[
+              { key: "name", label: "Nome" },
+              { key: "category", label: "Categoria" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Telefono" },
+              { key: "reliability", label: "Affidabilità" },
+              { key: "commission_pct", label: "Commissione %" },
+            ]}
+          />
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+            <Upload className="mr-2 h-3 w-3" />Importa
+          </Button>
             filename="fornitori"
             columns={[
               { key: "name", label: "Nome" },
