@@ -2,27 +2,29 @@ import { LayoutDashboard, Users, Building2, ClipboardList, BarChart3, Settings, 
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
-const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Clienti", url: "/clients", icon: Users },
-  { title: "Fornitori", url: "/providers", icon: Building2 },
-  { title: "Richieste", url: "/requests", icon: ClipboardList },
-  { title: "Messaggi", url: "/messages", icon: MessageSquare },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Impostazioni", url: "/settings", icon: Settings },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { signOut } = useAuth();
+  const { t } = useTranslation();
+
+  const items = [
+    { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard },
+    { title: t("nav.clients"), url: "/clients", icon: Users },
+    { title: t("nav.providers"), url: "/providers", icon: Building2 },
+    { title: t("nav.requests"), url: "/requests", icon: ClipboardList },
+    { title: t("nav.messages"), url: "/messages", icon: MessageSquare },
+    { title: t("nav.analytics"), url: "/analytics", icon: BarChart3 },
+    { title: t("nav.settings"), url: "/settings", icon: Settings },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -37,11 +39,11 @@ export function AppSidebar() {
           )}
         </div>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("nav.menu")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
@@ -66,7 +68,7 @@ export function AppSidebar() {
           onClick={signOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          {!collapsed && "Esci"}
+          {!collapsed && t("common.logout")}
         </Button>
       </SidebarFooter>
     </Sidebar>

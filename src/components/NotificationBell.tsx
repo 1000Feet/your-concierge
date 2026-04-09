@@ -5,20 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Bell } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export function NotificationBell() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { data: notifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
+        .from("notifications").select("*").eq("user_id", user!.id)
+        .order("created_at", { ascending: false }).limit(20);
       return data ?? [];
     },
     enabled: !!user,
@@ -50,19 +49,17 @@ export function NotificationBell() {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-3 border-b">
-          <h4 className="font-medium text-sm">Notifiche</h4>
+          <h4 className="font-medium text-sm">{t("notifications.title")}</h4>
         </div>
         <div className="max-h-80 overflow-y-auto">
           {!notifications?.length ? (
-            <p className="text-muted-foreground text-sm text-center py-6">Nessuna notifica</p>
+            <p className="text-muted-foreground text-sm text-center py-6">{t("notifications.none")}</p>
           ) : (
             notifications.map((n) => (
               <div key={n.id} className={`p-3 border-b last:border-0 ${!n.read ? "bg-accent/5" : ""}`}>
                 <p className="text-sm font-medium">{n.title}</p>
                 {n.message && <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>}
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {format(new Date(n.created_at), "dd/MM HH:mm")}
-                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(n.created_at), "dd/MM HH:mm")}</p>
               </div>
             ))
           )}

@@ -12,25 +12,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Save } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 const DIET_OPTIONS = ["Nessuna", "Vegetariana", "Vegana", "Senza glutine", "Kosher", "Halal", "Altro"];
 const BUDGET_OPTIONS = ["Budget", "Medio", "Premium", "Luxury"];
 const LANGUAGE_OPTIONS = ["Italiano", "Inglese", "Francese", "Tedesco", "Spagnolo", "Russo", "Arabo", "Cinese", "Altro"];
-
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  draft: { label: "Bozza", color: "bg-muted text-muted-foreground" },
-  sent: { label: "Inviata", color: "bg-blue-100 text-blue-800" },
-  waiting: { label: "In Attesa", color: "bg-amber-100 text-amber-800" },
-  confirmed: { label: "Confermata", color: "bg-green-100 text-green-800" },
-  completed: { label: "Completata", color: "bg-emerald-100 text-emerald-800" },
-  cancelled: { label: "Annullata", color: "bg-red-100 text-red-800" },
-};
 
 const ClientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { data: client, isLoading } = useQuery({
     queryKey: ["client", id],
@@ -57,8 +50,6 @@ const ClientDetail = () => {
 
   const prefs = (client?.preferences as Record<string, any>) ?? {};
   const [preferences, setPreferences] = useState<Record<string, any>>({});
-
-  // Sync on load
   const currentPrefs = Object.keys(preferences).length > 0 ? preferences : prefs;
 
   const updatePref = (key: string, value: any) => {
@@ -72,13 +63,13 @@ const ClientDetail = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client", id] });
-      toast({ title: "Preferenze salvate" });
+      toast({ title: t("clients.preferences_saved") });
     },
-    onError: (err: any) => toast({ title: "Errore", description: err.message, variant: "destructive" }),
+    onError: (err: any) => toast({ title: t("common.error"), description: err.message, variant: "destructive" }),
   });
 
-  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Caricamento...</div>;
-  if (!client) return <div className="flex items-center justify-center h-64 text-muted-foreground">Cliente non trovato</div>;
+  if (isLoading) return <div className="flex items-center justify-center h-64 text-muted-foreground">{t("common.loading")}</div>;
+  if (!client) return <div className="flex items-center justify-center h-64 text-muted-foreground">{t("clients.not_found")}</div>;
 
   return (
     <div className="space-y-6">
@@ -93,129 +84,110 @@ const ClientDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Info Card */}
         <Card>
-          <CardHeader><CardTitle className="text-lg">Soggiorno</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{t("clients.stay")}</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Hotel</span>
+              <span className="text-muted-foreground">{t("clients.hotel")}</span>
               <span className="font-medium">{client.hotel ?? "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Arrivo</span>
+              <span className="text-muted-foreground">{t("clients.arrival")}</span>
               <span>{client.arrival_date ? format(new Date(client.arrival_date), "dd/MM/yyyy") : "—"}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Partenza</span>
+              <span className="text-muted-foreground">{t("clients.departure")}</span>
               <span>{client.departure_date ? format(new Date(client.departure_date), "dd/MM/yyyy") : "—"}</span>
             </div>
             {client.notes && (
               <div className="pt-2 border-t">
-                <p className="text-xs text-muted-foreground">Note</p>
+                <p className="text-xs text-muted-foreground">{t("common.notes")}</p>
                 <p className="mt-1">{client.notes}</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Preferences */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Preferenze</CardTitle>
+            <CardTitle className="text-lg">{t("clients.preferences")}</CardTitle>
             <Button size="sm" onClick={() => savePrefsMutation.mutate()} disabled={savePrefsMutation.isPending}>
-              <Save className="mr-2 h-3 w-3" />Salva
+              <Save className="mr-2 h-3 w-3" />{t("common.save")}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label>Dieta</Label>
+                <Label>{t("clients.diet")}</Label>
                 <Select value={currentPrefs.diet ?? ""} onValueChange={(v) => updatePref("diet", v)}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
-                  <SelectContent>
-                    {DIET_OPTIONS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                  </SelectContent>
+                  <SelectTrigger><SelectValue placeholder={t("common.select")} /></SelectTrigger>
+                  <SelectContent>{DIET_OPTIONS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Fascia Budget</Label>
+                <Label>{t("clients.budget_tier")}</Label>
                 <Select value={currentPrefs.budget_tier ?? ""} onValueChange={(v) => updatePref("budget_tier", v)}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
-                  <SelectContent>
-                    {BUDGET_OPTIONS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
-                  </SelectContent>
+                  <SelectTrigger><SelectValue placeholder={t("common.select")} /></SelectTrigger>
+                  <SelectContent>{BUDGET_OPTIONS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Lingua</Label>
+                <Label>{t("clients.language")}</Label>
                 <Select value={currentPrefs.language ?? ""} onValueChange={(v) => updatePref("language", v)}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
-                  <SelectContent>
-                    {LANGUAGE_OPTIONS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                  </SelectContent>
+                  <SelectTrigger><SelectValue placeholder={t("common.select")} /></SelectTrigger>
+                  <SelectContent>{LANGUAGE_OPTIONS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Allergie</Label>
-                <Input
-                  value={currentPrefs.allergies ?? ""}
-                  onChange={(e) => updatePref("allergies", e.target.value)}
-                  placeholder="Es. arachidi, lattosio..."
-                />
+                <Label>{t("clients.allergies")}</Label>
+                <Input value={currentPrefs.allergies ?? ""} onChange={(e) => updatePref("allergies", e.target.value)}
+                  placeholder={t("clients.allergies_placeholder")} />
               </div>
             </div>
             <div className="space-y-1">
-              <Label>Servizi Preferiti</Label>
-              <Input
-                value={currentPrefs.preferred_services ?? ""}
-                onChange={(e) => updatePref("preferred_services", e.target.value)}
-                placeholder="Es. yacht, tour enogastronomici..."
-              />
+              <Label>{t("clients.preferred_services")}</Label>
+              <Input value={currentPrefs.preferred_services ?? ""} onChange={(e) => updatePref("preferred_services", e.target.value)}
+                placeholder={t("clients.preferred_services_placeholder")} />
             </div>
             <div className="space-y-1">
-              <Label>Note Aggiuntive</Label>
-              <Textarea
-                value={currentPrefs.notes ?? ""}
-                onChange={(e) => updatePref("notes", e.target.value)}
-                rows={2}
-                placeholder="Altre preferenze..."
-              />
+              <Label>{t("clients.additional_notes")}</Label>
+              <Textarea value={currentPrefs.notes ?? ""} onChange={(e) => updatePref("notes", e.target.value)}
+                rows={2} placeholder={t("clients.additional_notes_placeholder")} />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Request History */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Storico Richieste</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="text-lg">{t("clients.request_history")}</CardTitle></CardHeader>
         <CardContent>
           {!clientRequests?.length ? (
-            <p className="text-muted-foreground text-sm text-center py-4">Nessuna richiesta per questo cliente</p>
+            <p className="text-muted-foreground text-sm text-center py-4">{t("clients.no_requests")}</p>
           ) : (
             <div className="space-y-2">
-              {clientRequests.map((r) => {
-                const si = STATUS_LABELS[r.status];
-                return (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => navigate(`/requests/${r.id}`)}
-                  >
-                    <div>
-                      <p className="font-medium text-sm">{r.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {r.service_date ? format(new Date(r.service_date), "dd/MM/yyyy") : ""}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {r.final_price && <span className="text-sm font-medium">€{Number(r.final_price).toFixed(0)}</span>}
-                      <Badge className={si?.color ?? ""}>{si?.label ?? r.status}</Badge>
-                    </div>
+              {clientRequests.map((r) => (
+                <div key={r.id}
+                  className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => navigate(`/requests/${r.id}`)}>
+                  <div>
+                    <p className="font-medium text-sm">{r.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {r.service_date ? format(new Date(r.service_date), "dd/MM/yyyy") : ""}
+                    </p>
                   </div>
-                );
-              })}
+                  <div className="flex items-center gap-2">
+                    {r.final_price && <span className="text-sm font-medium">€{Number(r.final_price).toFixed(0)}</span>}
+                    <Badge className={
+                      r.status === "completed" ? "bg-emerald-100 text-emerald-800" :
+                      r.status === "confirmed" ? "bg-green-100 text-green-800" :
+                      r.status === "waiting" ? "bg-amber-100 text-amber-800" :
+                      r.status === "sent" ? "bg-blue-100 text-blue-800" :
+                      r.status === "cancelled" ? "bg-red-100 text-red-800" :
+                      "bg-muted text-muted-foreground"
+                    }>{t(`status.${r.status}`)}</Badge>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>

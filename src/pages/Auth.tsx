@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,11 +18,11 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -29,25 +30,14 @@ const Auth = () => {
         navigate("/");
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { first_name: firstName, last_name: lastName },
-            emailRedirectTo: window.location.origin,
-          },
+          email, password,
+          options: { data: { first_name: firstName, last_name: lastName }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast({
-          title: "Account creato!",
-          description: "Controlla la tua email per verificare l'account.",
-        });
+        toast({ title: t("auth.account_created"), description: t("auth.check_email") });
       }
     } catch (error: any) {
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -61,28 +51,17 @@ const Auth = () => {
             Concierge<span className="text-accent">Desk</span>
           </h1>
           <p className="text-muted-foreground mt-2">
-            {isLogin ? "Accedi al tuo account" : "Crea un nuovo account"}
+            {isLogin ? t("auth.login_title") : t("auth.signup_title")}
           </p>
         </div>
-
         <Card>
           <CardHeader className="pb-4">
             <div className="flex gap-2">
-              <Button
-                variant={isLogin ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setIsLogin(true)}
-                type="button"
-              >
-                Accedi
+              <Button variant={isLogin ? "default" : "outline"} className="flex-1" onClick={() => setIsLogin(true)} type="button">
+                {t("auth.login")}
               </Button>
-              <Button
-                variant={!isLogin ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setIsLogin(false)}
-                type="button"
-              >
-                Registrati
+              <Button variant={!isLogin ? "default" : "outline"} className="flex-1" onClick={() => setIsLogin(false)} type="button">
+                {t("auth.signup")}
               </Button>
             </div>
           </CardHeader>
@@ -91,49 +70,26 @@ const Auth = () => {
               {!isLogin && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Nome</Label>
-                    <Input
-                      id="firstName"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      required={!isLogin}
-                    />
+                    <Label htmlFor="firstName">{t("auth.first_name")}</Label>
+                    <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required={!isLogin} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Cognome</Label>
-                    <Input
-                      id="lastName"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      required={!isLogin}
-                    />
+                    <Label htmlFor="lastName">{t("auth.last_name")}</Label>
+                    <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required={!isLogin} />
                   </div>
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <Label htmlFor="email">{t("common.email")}</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
+                <Label htmlFor="password">{t("auth.password")}</Label>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLogin ? "Accedi" : "Registrati"}
+                {isLogin ? t("auth.login") : t("auth.signup")}
               </Button>
             </form>
           </CardContent>

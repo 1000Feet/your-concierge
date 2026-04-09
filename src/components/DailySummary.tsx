@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Sparkles, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, Users, ClipboardList, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function DailySummary() {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [open, setOpen] = useState(true);
   const [error, setError] = useState("");
+  const { t } = useTranslation();
 
   const fetchSummary = async () => {
     setLoading(true);
@@ -19,7 +21,7 @@ export function DailySummary() {
       if (err) throw err;
       setSummary(data);
     } catch (e: any) {
-      setError(e.message || "Errore nel caricamento");
+      setError(e.message || t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -32,12 +34,12 @@ export function DailySummary() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Sparkles className="h-5 w-5 text-accent" />
-              Briefing Giornaliero AI
+              {t("dashboard.daily_briefing")}
             </CardTitle>
             <div className="flex gap-1">
               <Button variant="ghost" size="sm" onClick={fetchSummary} disabled={loading}>
                 <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-                {summary ? "Aggiorna" : "Genera"}
+                {summary ? t("common.refresh") : t("common.generate")}
               </Button>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -51,9 +53,9 @@ export function DailySummary() {
           <CardContent>
             {error && <p className="text-sm text-destructive">{error}</p>}
             {!summary && !error && !loading && (
-              <p className="text-sm text-muted-foreground">Clicca "Genera" per il briefing di oggi</p>
+              <p className="text-sm text-muted-foreground">{t("dashboard.click_generate")}</p>
             )}
-            {loading && <p className="text-sm text-muted-foreground animate-pulse">Generazione in corso...</p>}
+            {loading && <p className="text-sm text-muted-foreground animate-pulse">{t("common.generating")}</p>}
             {summary && (
               <div className="space-y-3">
                 {summary.summary && <p className="text-sm whitespace-pre-wrap">{summary.summary}</p>}
@@ -62,19 +64,19 @@ export function DailySummary() {
                     {summary.metrics.arrivals != null && (
                       <div className="flex items-center gap-2 text-sm">
                         <Users className="h-4 w-4 text-accent" />
-                        <span>{summary.metrics.arrivals} arrivi oggi</span>
+                        <span>{summary.metrics.arrivals} {t("dashboard.arrivals_today")}</span>
                       </div>
                     )}
                     {summary.metrics.active_requests != null && (
                       <div className="flex items-center gap-2 text-sm">
                         <ClipboardList className="h-4 w-4 text-accent" />
-                        <span>{summary.metrics.active_requests} richieste attive</span>
+                        <span>{summary.metrics.active_requests} {t("dashboard.active_requests_count")}</span>
                       </div>
                     )}
                     {summary.metrics.weekly_revenue != null && (
                       <div className="flex items-center gap-2 text-sm">
                         <TrendingUp className="h-4 w-4 text-accent" />
-                        <span>€{summary.metrics.weekly_revenue} revenue</span>
+                        <span>€{summary.metrics.weekly_revenue} {t("dashboard.revenue")}</span>
                       </div>
                     )}
                   </div>

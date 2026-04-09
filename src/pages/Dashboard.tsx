@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building2, ClipboardList, TrendingUp, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { it } from "date-fns/locale";
+import { it as itLocale } from "date-fns/locale";
 import { DailySummary } from "@/components/DailySummary";
+import { useTranslation } from "react-i18next";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
+
   const { data: clients } = useQuery({
     queryKey: ["clients-count"],
     queryFn: async () => {
@@ -73,8 +76,8 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Panoramica della tua attività di concierge</p>
+        <h1 className="text-2xl font-heading font-bold text-foreground">{t("dashboard.title")}</h1>
+        <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
       </div>
 
       <DailySummary />
@@ -82,39 +85,31 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Clienti</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.clients")}</CardTitle>
             <Users className="h-4 w-4 text-accent" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{clients ?? 0}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold">{clients ?? 0}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Fornitori</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.providers")}</CardTitle>
             <Building2 className="h-4 w-4 text-accent" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{providers ?? 0}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold">{providers ?? 0}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Richieste Attive</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.active_requests")}</CardTitle>
             <ClipboardList className="h-4 w-4 text-accent" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeRequests}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold">{activeRequests}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Margine Totale</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.total_margin")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-accent" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">€{totalMargin.toFixed(0)}</div>
-          </CardContent>
+          <CardContent><div className="text-2xl font-bold">€{totalMargin.toFixed(0)}</div></CardContent>
         </Card>
       </div>
 
@@ -123,12 +118,12 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Clock className="h-5 w-5 text-accent" />
-              Richieste Recenti
+              {t("dashboard.recent_requests")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {recentRequests?.length === 0 ? (
-              <p className="text-muted-foreground text-sm">Nessuna richiesta ancora</p>
+              <p className="text-muted-foreground text-sm">{t("dashboard.no_requests_yet")}</p>
             ) : (
               <div className="space-y-3">
                 {recentRequests?.map((req) => (
@@ -139,7 +134,7 @@ const Dashboard = () => {
                         {req.clients ? `${req.clients.first_name} ${req.clients.last_name}` : "—"}
                       </p>
                     </div>
-                    <Badge className={statusColors[req.status] ?? ""}>{req.status}</Badge>
+                    <Badge className={statusColors[req.status] ?? ""}>{t(`status.${req.status}`)}</Badge>
                   </div>
                 ))}
               </div>
@@ -151,12 +146,12 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Calendar className="h-5 w-5 text-accent" />
-              Prossimi Arrivi
+              {t("dashboard.upcoming_arrivals")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {upcomingArrivals?.length === 0 ? (
-              <p className="text-muted-foreground text-sm">Nessun arrivo previsto</p>
+              <p className="text-muted-foreground text-sm">{t("dashboard.no_arrivals")}</p>
             ) : (
               <div className="space-y-3">
                 {upcomingArrivals?.map((client) => (
@@ -166,7 +161,7 @@ const Dashboard = () => {
                       <p className="text-xs text-muted-foreground">{client.hotel ?? "—"}</p>
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {client.arrival_date ? format(new Date(client.arrival_date), "d MMM", { locale: it }) : "—"}
+                      {client.arrival_date ? format(new Date(client.arrival_date), "d MMM", { locale: itLocale }) : "—"}
                     </span>
                   </div>
                 ))}
