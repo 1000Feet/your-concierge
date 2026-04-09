@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Trash2, Sparkles, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
+import { RequestStatusSelect } from "@/components/RequestStatusSelect";
 import type { Database } from "@/integrations/supabase/types";
 
 type RequestProviderStatus = Database["public"]["Enums"]["request_provider_status"];
@@ -216,7 +217,7 @@ const RequestDetail = () => {
           <h1 className="text-2xl font-heading font-bold">Dettaglio Richiesta</h1>
           <p className="text-muted-foreground">{request.description}</p>
         </div>
-        <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+        <RequestStatusSelect requestId={request.id} currentStatus={request.status} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

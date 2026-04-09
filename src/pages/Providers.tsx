@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit, Star } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Star, Upload } from "lucide-react";
 import { ExportCSVButton } from "@/components/ExcelImportExport";
+import { ImportDialog } from "@/components/ImportDialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProviderCategory = Database["public"]["Enums"]["provider_category"];
