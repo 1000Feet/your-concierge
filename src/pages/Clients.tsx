@@ -229,6 +229,36 @@ const Clients = () => {
           </Table>
         </CardContent>
       </Card>
+      <ImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Importa Clienti"
+        columns={[
+          { key: "first_name", label: "Nome" },
+          { key: "last_name", label: "Cognome" },
+          { key: "email", label: "Email" },
+          { key: "phone", label: "Telefono" },
+          { key: "hotel", label: "Hotel" },
+          { key: "arrival_date", label: "Arrivo" },
+          { key: "departure_date", label: "Partenza" },
+        ]}
+        requiredKeys={["first_name", "last_name"]}
+        onImport={async (rows) => {
+          for (const row of rows) {
+            await supabase.from("clients").insert({
+              first_name: row.first_name,
+              last_name: row.last_name,
+              email: row.email || null,
+              phone: row.phone || null,
+              hotel: row.hotel || null,
+              arrival_date: row.arrival_date || null,
+              departure_date: row.departure_date || null,
+              user_id: user!.id,
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ["clients"] });
+        }}
+      />
     </div>
   );
 };
