@@ -134,16 +134,6 @@ const Providers = () => {
           <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
             <Upload className="mr-2 h-3 w-3" />Importa
           </Button>
-            filename="fornitori"
-            columns={[
-              { key: "name", label: "Nome" },
-              { key: "category", label: "Categoria" },
-              { key: "email", label: "Email" },
-              { key: "phone", label: "Telefono" },
-              { key: "reliability", label: "Affidabilità" },
-              { key: "commission_pct", label: "Commissione %" },
-            ]}
-          />
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuovo Fornitore</Button>
