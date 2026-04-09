@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit, Eye, Sparkles, Download } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Eye, Sparkles } from "lucide-react";
+import { ExportCSVButton } from "@/components/ExcelImportExport";
 import { format } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -148,7 +149,25 @@ const Requests = () => {
           <h1 className="text-2xl font-heading font-bold">Richieste</h1>
           <p className="text-muted-foreground">Gestisci le richieste dei clienti</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+        <div className="flex gap-2">
+          <ExportCSVButton
+            data={(filtered ?? []).map((r: any) => ({
+              ...r,
+              client_name: r.clients ? `${r.clients.first_name} ${r.clients.last_name}` : "",
+            }))}
+            filename="richieste"
+            columns={[
+              { key: "description", label: "Descrizione" },
+              { key: "client_name", label: "Cliente" },
+              { key: "service_type", label: "Servizio" },
+              { key: "status", label: "Stato" },
+              { key: "service_date", label: "Data" },
+              { key: "budget", label: "Budget" },
+              { key: "final_price", label: "Prezzo Finale" },
+              { key: "margin", label: "Margine" },
+            ]}
+          />
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuova Richiesta</Button>
           </DialogTrigger>
