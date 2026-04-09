@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit, Star } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Star, Upload } from "lucide-react";
 import { ExportCSVButton } from "@/components/ExcelImportExport";
+import { ImportDialog } from "@/components/ImportDialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProviderCategory = Database["public"]["Enums"]["provider_category"];
@@ -35,6 +37,7 @@ const Providers = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<any>(null);
   const [form, setForm] = useState({
     name: "", category: "other" as ProviderCategory, email: "", phone: "",
@@ -128,6 +131,9 @@ const Providers = () => {
               { key: "commission_pct", label: "Commissione %" },
             ]}
           />
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+            <Upload className="mr-2 h-3 w-3" />Importa
+          </Button>
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuovo Fornitore</Button>
@@ -209,7 +215,9 @@ const Providers = () => {
               ) : (
                 filtered?.map((p) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link to={`/providers/${p.id}`} className="hover:text-primary hover:underline">{p.name}</Link>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary">{CATEGORIES.find((c) => c.value === p.category)?.label ?? p.category}</Badge>
                     </TableCell>
@@ -238,6 +246,34 @@ const Providers = () => {
           </Table>
         </CardContent>
       </Card>
+      <ImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Importa Fornitori"
+        columns={[
+          { key: "name", label: "Nome" },
+          { key: "category", label: "Categoria" },
+          { key: "email", label: "Email" },
+          { key: "phone", label: "Telefono" },
+          { key: "reliability", label: "Affidabilità" },
+          { key: "commission_pct", label: "Commissione %" },
+        ]}
+        requiredKeys={["name"]}
+        onImport={async (rows) => {
+          for (const row of rows) {
+            await supabase.from("providers").insert({
+              name: row.name,
+              category: (row.category as ProviderCategory) || "other",
+              email: row.email || null,
+              phone: row.phone || null,
+              reliability: parseInt(row.reliability) || 5,
+              commission_pct: parseFloat(row.commission_pct) || 0,
+              user_id: user!.id,
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ["providers"] });
+        }}
+      />
     </div>
   );
 };

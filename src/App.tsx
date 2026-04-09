@@ -9,8 +9,10 @@ import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import ClientDetail from "./pages/ClientDetail";
 import Providers from "./pages/Providers";
+import ProviderDetail from "./pages/ProviderDetail";
 import Requests from "./pages/Requests";
 import RequestDetail from "./pages/RequestDetail";
+import Messages from "./pages/Messages";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
@@ -39,8 +41,10 @@ const AppRoutes = () => (
     <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
     <Route path="/clients/:id" element={<ProtectedRoute><ClientDetail /></ProtectedRoute>} />
     <Route path="/providers" element={<ProtectedRoute><Providers /></ProtectedRoute>} />
+    <Route path="/providers/:id" element={<ProtectedRoute><ProviderDetail /></ProtectedRoute>} />
     <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
     <Route path="/requests/:id" element={<ProtectedRoute><RequestDetail /></ProtectedRoute>} />
+    <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
     <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
