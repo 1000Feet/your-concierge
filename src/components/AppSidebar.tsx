@@ -1,18 +1,10 @@
-import { LayoutDashboard, Users, Building2, ClipboardList, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Building2, ClipboardList, BarChart3, Settings, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +13,8 @@ const items = [
   { title: "Clienti", url: "/clients", icon: Users },
   { title: "Fornitori", url: "/providers", icon: Building2 },
   { title: "Richieste", url: "/requests", icon: ClipboardList },
+  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Impostazioni", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -41,7 +35,6 @@ export function AppSidebar() {
             <span className="text-sidebar-primary font-heading font-bold text-lg">C</span>
           )}
         </div>
-
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -65,7 +58,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className="p-3">
         <Button
           variant="ghost"

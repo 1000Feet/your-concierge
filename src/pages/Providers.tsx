@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Trash2, Edit, Star } from "lucide-react";
+import { ExportCSVButton } from "@/components/ExcelImportExport";
 import type { Database } from "@/integrations/supabase/types";
 
 type ProviderCategory = Database["public"]["Enums"]["provider_category"];
@@ -114,7 +115,20 @@ const Providers = () => {
           <h1 className="text-2xl font-heading font-bold">Fornitori</h1>
           <p className="text-muted-foreground">Gestisci i tuoi fornitori di servizi</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+        <div className="flex gap-2">
+          <ExportCSVButton
+            data={filtered ?? []}
+            filename="fornitori"
+            columns={[
+              { key: "name", label: "Nome" },
+              { key: "category", label: "Categoria" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Telefono" },
+              { key: "reliability", label: "Affidabilità" },
+              { key: "commission_pct", label: "Commissione %" },
+            ]}
+          />
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuovo Fornitore</Button>
           </DialogTrigger>
@@ -166,6 +180,7 @@ const Providers = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="relative max-w-sm">

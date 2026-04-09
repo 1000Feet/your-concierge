@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Eye, Sparkles } from "lucide-react";
+import { ExportCSVButton } from "@/components/ExcelImportExport";
 import { format } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -41,6 +43,7 @@ const SERVICE_TYPES: { value: ServiceType; label: string }[] = [
 ];
 
 const Requests = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -146,7 +149,25 @@ const Requests = () => {
           <h1 className="text-2xl font-heading font-bold">Richieste</h1>
           <p className="text-muted-foreground">Gestisci le richieste dei clienti</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+        <div className="flex gap-2">
+          <ExportCSVButton
+            data={(filtered ?? []).map((r: any) => ({
+              ...r,
+              client_name: r.clients ? `${r.clients.first_name} ${r.clients.last_name}` : "",
+            }))}
+            filename="richieste"
+            columns={[
+              { key: "description", label: "Descrizione" },
+              { key: "client_name", label: "Cliente" },
+              { key: "service_type", label: "Servizio" },
+              { key: "status", label: "Stato" },
+              { key: "service_date", label: "Data" },
+              { key: "budget", label: "Budget" },
+              { key: "final_price", label: "Prezzo Finale" },
+              { key: "margin", label: "Margine" },
+            ]}
+          />
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" />Nuova Richiesta</Button>
           </DialogTrigger>
@@ -156,7 +177,40 @@ const Requests = () => {
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
               <div className="space-y-1">
-                <Label>Descrizione *</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Descrizione *</Label>
+                  {!editingRequest && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      onClick={async () => {
+                        if (!form.description) return;
+                        try {
+                          const { data, error } = await supabase.functions.invoke("ai-extract", {
+                            body: { text: form.description },
+                          });
+                          if (error) throw error;
+                          const ex = data.extracted ?? {};
+                          setForm((f: typeof form) => ({
+                            ...f,
+                            service_type: ex.service_type ?? f.service_type,
+                            description: ex.description ?? f.description,
+                            group_size: ex.group_size?.toString() ?? f.group_size,
+                            budget: ex.budget?.toString() ?? f.budget,
+                            service_date: ex.service_date ?? f.service_date,
+                          }));
+                          toast({ title: "Dati estratti con AI" });
+                        } catch {
+                          toast({ title: "Errore estrazione AI", variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Sparkles className="mr-1 h-3 w-3" />AI Extract
+                    </Button>
+                  )}
+                </div>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required rows={2} />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -222,6 +276,7 @@ const Requests = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="flex gap-3 items-center">
@@ -274,6 +329,9 @@ const Requests = () => {
                       <TableCell>{r.budget ? `€${Number(r.budget).toFixed(0)}` : "—"}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => navigate(`/requests/${r.id}`)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={() => openEdit(r)}>
                             <Edit className="h-4 w-4" />
                           </Button>
