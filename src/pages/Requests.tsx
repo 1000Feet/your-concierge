@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Eye } from "lucide-react";
 import { format } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -41,6 +42,7 @@ const SERVICE_TYPES: { value: ServiceType; label: string }[] = [
 ];
 
 const Requests = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -274,6 +276,9 @@ const Requests = () => {
                       <TableCell>{r.budget ? `€${Number(r.budget).toFixed(0)}` : "—"}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => navigate(`/requests/${r.id}`)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={() => openEdit(r)}>
                             <Edit className="h-4 w-4" />
                           </Button>

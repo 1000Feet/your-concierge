@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,10 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Eye } from "lucide-react";
 import { format } from "date-fns";
 
 const Clients = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -188,6 +190,9 @@ const Clients = () => {
                     <TableCell>{client.arrival_date ? format(new Date(client.arrival_date), "dd/MM/yyyy") : "—"}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => navigate(`/clients/${client.id}`)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(client)}>
                           <Edit className="h-4 w-4" />
                         </Button>
