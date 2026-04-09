@@ -62,6 +62,150 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          channel: Database["public"]["Enums"]["conversation_channel"]
+          client_id: string | null
+          created_at: string
+          id: string
+          last_message_at: string | null
+          provider_id: string | null
+          request_id: string | null
+          subject: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["conversation_channel"]
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          provider_id?: string | null
+          request_id?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["conversation_channel"]
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          provider_id?: string | null
+          request_id?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_templates: {
+        Row: {
+          body: string
+          category: Database["public"]["Enums"]["template_category"]
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          subject: string | null
+          updated_at: string
+          user_id: string
+          variables: string[] | null
+        }
+        Insert: {
+          body: string
+          category?: Database["public"]["Enums"]["template_category"]
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          subject?: string | null
+          updated_at?: string
+          user_id: string
+          variables?: string[] | null
+        }
+        Update: {
+          body?: string
+          category?: Database["public"]["Enums"]["template_category"]
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          subject?: string | null
+          updated_at?: string
+          user_id?: string
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_ai_generated: boolean
+          is_read: boolean
+          metadata: Json | null
+          sender_type: Database["public"]["Enums"]["message_sender_type"]
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_ai_generated?: boolean
+          is_read?: boolean
+          metadata?: Json | null
+          sender_type?: Database["public"]["Enums"]["message_sender_type"]
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_ai_generated?: boolean
+          is_read?: boolean
+          metadata?: Json | null
+          sender_type?: Database["public"]["Enums"]["message_sender_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -127,6 +271,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      provider_availability: {
+        Row: {
+          created_at: string
+          current_bookings: number
+          date: string
+          end_time: string | null
+          id: string
+          max_capacity: number
+          notes: string | null
+          provider_id: string
+          start_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_bookings?: number
+          date: string
+          end_time?: string | null
+          id?: string
+          max_capacity?: number
+          notes?: string | null
+          provider_id: string
+          start_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_bookings?: number
+          date?: string
+          end_time?: string | null
+          id?: string
+          max_capacity?: number
+          notes?: string | null
+          provider_id?: string
+          start_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       providers: {
         Row: {
@@ -218,6 +409,44 @@ export type Database = {
           },
         ]
       }
+      request_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          notes: string | null
+          old_status: string | null
+          request_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          old_status?: string | null
+          request_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          old_status?: string | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_status_history_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       requests: {
         Row: {
           budget: number | null
@@ -288,6 +517,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      conversation_channel: "in_app" | "whatsapp" | "email"
+      message_sender_type: "concierge" | "client" | "provider" | "system"
       provider_category:
         | "tour"
         | "chef"
@@ -315,6 +546,14 @@ export type Database = {
         | "babysitter"
         | "restaurant"
         | "wellness"
+        | "other"
+      template_category:
+        | "client_proposal"
+        | "provider_inquiry"
+        | "follow_up"
+        | "confirmation"
+        | "cancellation"
+        | "welcome"
         | "other"
     }
     CompositeTypes: {
@@ -443,6 +682,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      conversation_channel: ["in_app", "whatsapp", "email"],
+      message_sender_type: ["concierge", "client", "provider", "system"],
       provider_category: [
         "tour",
         "chef",
@@ -472,6 +713,15 @@ export const Constants = {
         "babysitter",
         "restaurant",
         "wellness",
+        "other",
+      ],
+      template_category: [
+        "client_proposal",
+        "provider_inquiry",
+        "follow_up",
+        "confirmation",
+        "cancellation",
+        "welcome",
         "other",
       ],
     },
