@@ -16,6 +16,7 @@ import RequestDetail from "./pages/RequestDetail";
 import Messages from "./pages/Messages";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import Tutorial from "./pages/Tutorial";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,7 @@ const AppRoutes = () => (
     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
     <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+    <Route path="/tutorial" element={<ProtectedRoute><Tutorial /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
