@@ -325,42 +325,54 @@ export type Database = {
           commission_pct: number | null
           created_at: string
           email: string | null
+          facebook: string | null
           id: string
+          instagram: string | null
           is_active: boolean | null
           name: string
           notes: string | null
           phone: string | null
           reliability: number | null
+          tiktok: string | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["provider_category"]
           commission_pct?: number | null
           created_at?: string
           email?: string | null
+          facebook?: string | null
           id?: string
+          instagram?: string | null
           is_active?: boolean | null
           name: string
           notes?: string | null
           phone?: string | null
           reliability?: number | null
+          tiktok?: string | null
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["provider_category"]
           commission_pct?: number | null
           created_at?: string
           email?: string | null
+          facebook?: string | null
           id?: string
+          instagram?: string | null
           is_active?: boolean | null
           name?: string
           notes?: string | null
           phone?: string | null
           reliability?: number | null
+          tiktok?: string | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: []
       }
