@@ -141,7 +141,12 @@
     "total_revenue": "Total Revenue",
     "no_requests": "No requests",
     "provider_assigned": "Provider assigned",
-    "provider_removed": "Provider removed"
+    "provider_removed": "Provider removed",
+    "website": "Website",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "tiktok": "TikTok",
+    "social_links": "Social & Web"
   },
   "requests": {
     "title": "Requests",
