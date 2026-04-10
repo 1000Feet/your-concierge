@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Star, CheckCircle, XCircle, TrendingUp } from "lucide-react";
+import { ArrowLeft, Star, CheckCircle, XCircle, TrendingUp, Globe, Instagram, Facebook } from "lucide-react";
 import { ProviderAvailabilityCalendar } from "@/components/ProviderAvailabilityCalendar";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -65,6 +65,30 @@ const ProviderDetail = () => {
               <Badge className="bg-green-100 text-green-800">{t("providers.active")}</Badge>
             ) : (
               <Badge variant="destructive">{t("providers.inactive")}</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-3 mt-1">
+            {provider.email && <span className="text-sm text-muted-foreground">{provider.email}</span>}
+            {provider.phone && <span className="text-sm text-muted-foreground">{provider.phone}</span>}
+            {provider.website && (
+              <a href={provider.website.startsWith("http") ? provider.website : `https://${provider.website}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                <Globe className="h-4 w-4" />
+              </a>
+            )}
+            {provider.instagram && (
+              <a href={`https://instagram.com/${provider.instagram.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                <Instagram className="h-4 w-4" />
+              </a>
+            )}
+            {provider.facebook && (
+              <a href={provider.facebook.startsWith("http") ? provider.facebook : `https://facebook.com/${provider.facebook}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                <Facebook className="h-4 w-4" />
+              </a>
+            )}
+            {provider.tiktok && (
+              <a href={`https://tiktok.com/@${provider.tiktok.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary font-medium">
+                TikTok
+              </a>
             )}
           </div>
         </div>

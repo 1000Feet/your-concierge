@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Edit, Star, Upload } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Star, Upload, Globe, Instagram } from "lucide-react";
 import { ExportCSVButton } from "@/components/ExcelImportExport";
 import { ImportDialog } from "@/components/ImportDialog";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,7 @@ const Providers = () => {
   const [form, setForm] = useState({
     name: "", category: "other" as ProviderCategory, email: "", phone: "",
     reliability: "5", commission_pct: "0", notes: "",
+    website: "", instagram: "", facebook: "", tiktok: "",
   });
 
   const CATEGORIES: { value: ProviderCategory; label: string }[] = [
@@ -60,7 +61,10 @@ const Providers = () => {
       const payload = {
         name: values.name, category: values.category, email: values.email || null,
         phone: values.phone || null, reliability: parseInt(values.reliability),
-        commission_pct: parseFloat(values.commission_pct), notes: values.notes || null, user_id: user!.id,
+        commission_pct: parseFloat(values.commission_pct), notes: values.notes || null,
+        website: values.website || null, instagram: values.instagram || null,
+        facebook: values.facebook || null, tiktok: values.tiktok || null,
+        user_id: user!.id,
       };
       if (editingProvider) {
         const { error } = await supabase.from("providers").update(payload).eq("id", editingProvider.id);
@@ -91,7 +95,7 @@ const Providers = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: "", category: "other", email: "", phone: "", reliability: "5", commission_pct: "0", notes: "" });
+    setForm({ name: "", category: "other", email: "", phone: "", reliability: "5", commission_pct: "0", notes: "", website: "", instagram: "", facebook: "", tiktok: "" });
     setEditingProvider(null);
   };
 
@@ -100,6 +104,7 @@ const Providers = () => {
     setForm({
       name: p.name, category: p.category, email: p.email ?? "", phone: p.phone ?? "",
       reliability: String(p.reliability ?? 5), commission_pct: String(p.commission_pct ?? 0), notes: p.notes ?? "",
+      website: p.website ?? "", instagram: p.instagram ?? "", facebook: p.facebook ?? "", tiktok: p.tiktok ?? "",
     });
     setDialogOpen(true);
   };
@@ -174,6 +179,15 @@ const Providers = () => {
                   </div>
                 </div>
                 <div className="space-y-1">
+                  <Label>{t("providers.social_links")}</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input placeholder={t("providers.website")} value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
+                    <Input placeholder="Instagram" value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} />
+                    <Input placeholder="Facebook" value={form.facebook} onChange={(e) => setForm({ ...form, facebook: e.target.value })} />
+                    <Input placeholder="TikTok" value={form.tiktok} onChange={(e) => setForm({ ...form, tiktok: e.target.value })} />
+                  </div>
+                </div>
+                <div className="space-y-1">
                   <Label>{t("common.notes")}</Label>
                   <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
@@ -225,7 +239,13 @@ const Providers = () => {
                       </div>
                     </TableCell>
                     <TableCell>{p.commission_pct}%</TableCell>
-                    <TableCell className="text-sm">{p.email ?? p.phone ?? "—"}</TableCell>
+                    <TableCell className="text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>{p.email ?? p.phone ?? "—"}</span>
+                        {p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noopener noreferrer"><Globe className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" /></a>}
+                        {p.instagram && <a href={`https://instagram.com/${p.instagram.replace("@","")}`} target="_blank" rel="noopener noreferrer"><Instagram className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" /></a>}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>

@@ -141,7 +141,12 @@
     "total_revenue": "Ingresos Totales",
     "no_requests": "Sin solicitudes",
     "provider_assigned": "Proveedor asignado",
-    "provider_removed": "Proveedor eliminado"
+    "provider_removed": "Proveedor eliminado",
+    "website": "Sitio Web",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "tiktok": "TikTok",
+    "social_links": "Social & Web"
   },
   "requests": {
     "title": "Solicitudes",
