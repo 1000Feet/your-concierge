@@ -239,7 +239,13 @@ const Providers = () => {
                       </div>
                     </TableCell>
                     <TableCell>{p.commission_pct}%</TableCell>
-                    <TableCell className="text-sm">{p.email ?? p.phone ?? "—"}</TableCell>
+                    <TableCell className="text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>{p.email ?? p.phone ?? "—"}</span>
+                        {p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noopener noreferrer"><Globe className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" /></a>}
+                        {p.instagram && <a href={`https://instagram.com/${p.instagram.replace("@","")}`} target="_blank" rel="noopener noreferrer"><Instagram className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" /></a>}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>
