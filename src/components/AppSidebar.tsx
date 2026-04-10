@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Building2, ClipboardList, BarChart3, Settings, LogOut, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Users, Building2, ClipboardList, BarChart3, Settings, LogOut, MessageSquare, HelpCircle } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,7 +61,17 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 space-y-1">
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-sidebar-foreground hover:text-sidebar-primary hover:bg-sidebar-accent"
+          asChild
+        >
+          <NavLink to="/tutorial" activeClassName="bg-sidebar-accent text-sidebar-primary">
+            <HelpCircle className="mr-2 h-4 w-4" />
+            {!collapsed && t("tutorial.title")}
+          </NavLink>
+        </Button>
         <Button
           variant="ghost"
           className="w-full justify-start text-sidebar-foreground hover:text-sidebar-primary hover:bg-sidebar-accent"
