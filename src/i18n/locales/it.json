@@ -258,9 +258,18 @@
     "mapping": "Mapping Colonne",
     "preview": "Anteprima",
     "importing": "Importazione",
-    "drag_drop": "Trascina un file CSV qui",
+    "drag_drop": "Trascina un file CSV o Excel qui",
     "file_loaded": "File caricato",
-    "rows_imported": "{{count}} righe importate"
+    "rows_imported": "{{count}} righe importate",
+    "ai_suggest": "Suggerimenti AI",
+    "ai_suggesting": "Analisi colonne in corso...",
+    "ai_badge": "AI",
+    "normalized": "Valore normalizzato automaticamente",
+    "original_value": "Originale",
+    "select_sheet": "Seleziona foglio",
+    "xlsx_supported": "CSV, XLSX e XLS supportati",
+    "auto_normalize": "Normalizza dati automaticamente",
+    "all_mapped": "Tutte le colonne sono già mappate"
   },
   "tutorial": {
     "title": "Tutorial",
