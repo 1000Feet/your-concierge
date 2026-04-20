@@ -1,78 +1,67 @@
 
 
-# Piano di Integrazione - Funzionalità Mancanti ConciergeDesk
+# Piano: Import Avanzato (XLSX + AI Mapping + Normalizzazione)
 
-## Panoramica
+Estendo il wizard `ImportDialog` con tre migliorie integrate nel flusso esistente a 4 step.
 
-I file descritti non sono ancora presenti nel progetto. Devo creare tutto da zero seguendo le specifiche fornite. Il lavoro si divide in 4 blocchi principali.
+## 1. Supporto XLSX nativo
 
----
+- Aggiungo libreria `xlsx` (SheetJS) al progetto
+- Aggiorno `src/lib/csv-parser.ts` (rinominato concettualmente in "file-parser") con nuova funzione `parseFile(file: File)` che:
+  - Rileva estensione (.csv, .txt, .xlsx, .xls)
+  - Per Excel: legge con `XLSX.read()`, prende il primo foglio, converte in array di array
+  - Per CSV: usa il parser esistente
+- Aggiorno `ImportDialog.tsx` per accettare `.xlsx,.xls,.csv,.txt` nell'`<input type="file">`
+- Se il file Excel ha più fogli, aggiungo uno step intermedio "Selezione foglio" (dropdown)
 
-## Blocco 1: Database Migration
+## 2. AI Mapping intelligente per colonne sconosciute
 
-Creo `supabase/migrations/20260409210000_add_missing_features.sql` con:
-- 5 nuove tabelle: `provider_availability`, `conversations`, `messages`, `message_templates`, `request_status_history`
-- RLS su tutte con policy per `auth.uid()`
-- Trigger: `validate_request_status_transition()`, `on_request_status_notification()`, `on_provider_response_notification()`, `on_new_message_notification()`
-- Auto-calcolo margine su provider accettato
-- Auto-update `last_message_at` su conversazione
-- 6 template messaggi italiani di default
-- `updated_at` trigger su tutte le nuove tabelle
+- Nuova edge function `supabase/functions/ai-column-mapper/index.ts`:
+  - Riceve: headers non mappati, prime 3 righe di esempio, lista campi target con label
+  - Usa Lovable AI (`google/gemini-3-flash-preview`) con tool calling per ritornare suggerimenti `{ header: string, suggested_key: string, confidence: number }[]`
+  - Gestione errori 429/402 con messaggio chiaro
+- In `ImportDialog`, dopo `autoMapColumns()`:
+  - Se ci sono header non mappati, mostro pulsante "Suggerimenti AI" nello step Mapping
+  - Al click chiamo l'edge function e pre-popolo i mapping con badge "AI" accanto
+  - L'utente può sempre modificare manualmente
 
----
+## 3. Normalizzazione automatica dati
 
-## Blocco 2: Librerie e Componenti Utility
+- Nuovo file `src/lib/data-normalizer.ts` con funzioni pure:
+  - `normalizeDate(value)`: converte formati (DD/MM/YYYY, MM-DD-YYYY, "15 gen 2026", Excel serial date) → ISO `YYYY-MM-DD`
+  - `normalizePhone(value, defaultCountry='IT')`: aggiunge prefisso internazionale, rimuove spazi/trattini
+  - `splitFullName(value)`: separa "Mario Rossi" → `{first_name, last_name}` se la colonna mappata è `first_name` ma il valore contiene spazi
+  - `normalizeEmail(value)`: trim + lowercase + validazione base
+  - `normalizeNumber(value)`: gestisce virgola/punto decimale (formato IT vs EN)
+- In `ImportDialog`, nello step Preview:
+  - Applico le normalizzazioni in base al tipo di campo (date → normalizeDate, phone → normalizePhone, ecc.)
+  - Mostro un toggle "Normalizza dati automaticamente" (default: on)
+  - Le righe normalizzate sono evidenziate con un'icona piccola "wand" e il valore originale è in tooltip
 
-**Nuovi file lib:**
-- `src/lib/request-state-machine.ts` — `canTransition()`, `getNextStatuses()`, `getStatusLabel()`, `getStatusColor()`, `getStatusIcon()`. Transizioni: draft→sent→waiting→confirmed→in_progress→completed, cancelled da qualsiasi stato
-- `src/lib/csv-parser.ts` — Parser CSV robusto (campi quotati, escape, BOM, auto-detect delimitatore)
-- `src/lib/column-mapper.ts` — Auto-mapping colonne multilingua con fuzzy matching Levenshtein
+## 4. Aggiornamenti UI ed i18n
 
-**Nuovi componenti:**
-- `src/components/RequestStatusSelect.tsx` — Dropdown con solo transizioni valide dalla state machine, dialog conferma per cancellazione
-- `src/components/ProviderAvailabilityCalendar.tsx` — Calendario mensile con CRUD su `provider_availability`
-- `src/components/NewConversationDialog.tsx` — Dialog per creare conversazioni (tipo contatto, link richiesta, canale)
-- `src/components/MessageTemplateSelector.tsx` — Dropdown template raggruppati per categoria
-- `src/components/ImportDialog.tsx` — Wizard 4 step (Upload → Mapping → Preview → Import) con csv-parser e column-mapper
-- `src/components/DailySummary.tsx` — Card briefing AI giornaliero per Dashboard
+- Nuove chiavi i18n in `it.json`, `en.json`, `es.json`:
+  - `import.ai_suggest`, `import.ai_suggesting`, `import.normalized`, `import.original_value`, `import.select_sheet`, `import.xlsx_supported`
+- Aggiorno `ExcelImportExport.tsx`: il pulsante import ora apre direttamente `ImportDialog` (rimuovendo il parser CSV legacy inline)
+- Aggiorno testo upload step: "CSV, XLSX, XLS supportati"
 
----
+## File modificati/creati
 
-## Blocco 3: Nuove Pagine e Edge Functions
+**Nuovi:**
+- `src/lib/data-normalizer.ts`
+- `supabase/functions/ai-column-mapper/index.ts`
 
-**Pagine:**
-- `src/pages/Messages.tsx` — Inbox completa con pannello conversazioni + thread chat, AI genera, template
-- `src/pages/ProviderDetail.tsx` — 3 tab (Disponibilita/Storico/Performance)
+**Modificati:**
+- `src/lib/csv-parser.ts` → estende con supporto XLSX
+- `src/components/ImportDialog.tsx` → integra i 3 nuovi flow
+- `src/components/ExcelImportExport.tsx` → usa ImportDialog
+- `src/i18n/locales/{it,en,es}.json` → nuove chiavi
+- `package.json` → aggiunge `xlsx`
 
-**Edge Functions:**
-- `supabase/functions/ai-suggest/index.ts` — Upgrade v2: interroga DB reale per provider, controlla disponibilita, ritorna suggerimenti strutturati con `provider_id`, `score`, `reason`, `estimated_cost`
-- `supabase/functions/ai-summary/index.ts` — Briefing giornaliero: arrivi, richieste attive, provider in attesa, revenue/margini settimanali
+## Note tecniche
 
----
-
-## Blocco 4: Modifiche ai File Esistenti
-
-- **`src/App.tsx`**: Aggiunta route `/providers/:id` → ProviderDetail, `/messages` → Messages
-- **`src/components/AppSidebar.tsx`**: Voce "Messaggi" con icona `MessageSquare`
-- **`src/pages/Dashboard.tsx`**: Aggiunta `DailySummary` in cima
-- **`src/pages/RequestDetail.tsx`**: Badge statico → `RequestStatusSelect` interattivo con mutation per cambio stato
-- **`src/pages/Providers.tsx`**: Nome provider cliccabile (Link a `/providers/:id`) + pulsante import con `ImportDialog`
-- **`src/pages/Clients.tsx`**: Pulsante import con `ImportDialog`
-- **`src/components/ExcelImportExport.tsx`**: `ImportCSVButton` apre `ImportDialog`
-
----
-
-## Dettagli Tecnici
-
-- La migrazione verra eseguita con il migration tool dopo le 2 esistenti
-- `ai-suggest` viene sostituito (non creato come v2 separato) per mantenere le chiamate esistenti funzionanti
-- `ai-summary` e una nuova edge function da deployare
-- I tipi TypeScript in `types.ts` si aggiorneranno automaticamente dopo la migrazione
-- Realtime non necessario in questa fase (puo essere aggiunto dopo)
-
-**Vincoli rispettati:**
-- State machine restrittiva (solo transizioni valide)
-- Template messaggi in italiano
-- Parser CSV con gestione BOM e delimitatori misti
-- RLS su tutte le nuove tabelle
+- `xlsx` (SheetJS) community edition è MIT, ~400KB gzipped
+- L'edge function AI viene chiamata solo se ci sono colonne non mappate (risparmio crediti)
+- Le normalizzazioni sono client-side (zero costi AI)
+- Il mapping manuale dell'utente ha sempre priorità su AI e autoMap
 
