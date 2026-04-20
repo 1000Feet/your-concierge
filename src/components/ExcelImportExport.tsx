@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { ImportDialog } from "@/components/ImportDialog";
 
 interface ExportButtonProps {
   data: any[];
@@ -42,52 +43,27 @@ export function ExportCSVButton({ data, filename, columns }: ExportButtonProps) 
 }
 
 interface ImportCSVButtonProps {
-  onImport: (rows: Record<string, string>[]) => void;
+  onImport: (rows: Record<string, string>[]) => Promise<void> | void;
   columns: { key: string; label: string }[];
+  requiredKeys?: string[];
 }
 
-export function ImportCSVButton({ onImport, columns }: ImportCSVButtonProps) {
-  const { toast } = useToast();
+export function ImportCSVButton({ onImport, columns, requiredKeys }: ImportCSVButtonProps) {
   const { t } = useTranslation();
-
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const text = ev.target?.result as string;
-        const lines = text.split("\n").filter((l) => l.trim());
-        if (lines.length < 2) {
-          toast({ title: t("common.error"), variant: "destructive" });
-          return;
-        }
-        const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
-        const rows = lines.slice(1).map((line) => {
-          const values = line.split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
-          const row: Record<string, string> = {};
-          headers.forEach((h, i) => {
-            const col = columns.find((c) => c.label === h || c.key === h);
-            if (col) row[col.key] = values[i] ?? "";
-          });
-          return row;
-        });
-        onImport(rows);
-        toast({ title: t("import.rows_imported", { count: rows.length }) });
-      } catch {
-        toast({ title: t("common.error"), variant: "destructive" });
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  };
+  const [open, setOpen] = useState(false);
 
   return (
-    <Button variant="outline" size="sm" asChild>
-      <label className="cursor-pointer">
+    <>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
         <Upload className="mr-2 h-3 w-3" />{t("common.import_csv")}
-        <input type="file" accept=".csv" className="hidden" onChange={handleFile} />
-      </label>
-    </Button>
+      </Button>
+      <ImportDialog
+        open={open}
+        onOpenChange={setOpen}
+        columns={columns}
+        requiredKeys={requiredKeys}
+        onImport={async (rows) => { await onImport(rows); }}
+      />
+    </>
   );
 }
