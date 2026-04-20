@@ -258,9 +258,18 @@
     "mapping": "Mapeo de Columnas",
     "preview": "Vista Previa",
     "importing": "Importando",
-    "drag_drop": "Arrastra un archivo CSV aquí",
+    "drag_drop": "Arrastra un archivo CSV o Excel aquí",
     "file_loaded": "Archivo cargado",
-    "rows_imported": "{{count}} filas importadas"
+    "rows_imported": "{{count}} filas importadas",
+    "ai_suggest": "Sugerencias IA",
+    "ai_suggesting": "Analizando columnas...",
+    "ai_badge": "IA",
+    "normalized": "Valor normalizado automáticamente",
+    "original_value": "Original",
+    "select_sheet": "Seleccionar hoja",
+    "xlsx_supported": "CSV, XLSX y XLS soportados",
+    "auto_normalize": "Normalizar datos automáticamente",
+    "all_mapped": "Todas las columnas ya están mapeadas"
   },
   "tutorial": {
     "title": "Tutorial",

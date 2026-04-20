@@ -15,6 +15,49 @@ export function parseCSV(text: string): { headers: string[]; rows: string[][] } 
   return { headers, rows };
 }
 
+export interface ParsedFile {
+  headers: string[];
+  rows: string[][];
+  sheetNames?: string[];
+  workbook?: any;
+}
+
+export async function parseFile(file: File, sheetName?: string): Promise<ParsedFile> {
+  const name = file.name.toLowerCase();
+  const isExcel = name.endsWith(".xlsx") || name.endsWith(".xls") || name.endsWith(".xlsm");
+
+  if (isExcel) {
+    const XLSX = await import("xlsx");
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array", cellDates: false });
+    const targetSheet = sheetName && wb.SheetNames.includes(sheetName) ? sheetName : wb.SheetNames[0];
+    const ws = wb.Sheets[targetSheet];
+    const aoa = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, defval: "", raw: true, blankrows: false });
+    if (aoa.length === 0) return { headers: [], rows: [], sheetNames: wb.SheetNames, workbook: wb };
+    const headers = (aoa[0] as any[]).map((h) => String(h ?? "").trim());
+    const rows = (aoa.slice(1) as any[][])
+      .map((r) => headers.map((_, i) => (r[i] === undefined || r[i] === null ? "" : String(r[i]))))
+      .filter((r) => r.some((c) => c.trim()));
+    return { headers, rows, sheetNames: wb.SheetNames, workbook: wb };
+  }
+
+  const text = await file.text();
+  const { headers, rows } = parseCSV(text);
+  return { headers, rows };
+}
+
+export async function parseFileFromWorkbook(workbook: any, sheetName: string): Promise<ParsedFile> {
+  const XLSX = await import("xlsx");
+  const ws = workbook.Sheets[sheetName];
+  const aoa = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, defval: "", raw: true, blankrows: false });
+  if (aoa.length === 0) return { headers: [], rows: [], sheetNames: workbook.SheetNames, workbook };
+  const headers = (aoa[0] as any[]).map((h) => String(h ?? "").trim());
+  const rows = (aoa.slice(1) as any[][])
+    .map((r) => headers.map((_, i) => (r[i] === undefined || r[i] === null ? "" : String(r[i]))))
+    .filter((r) => r.some((c) => c.trim()));
+  return { headers, rows, sheetNames: workbook.SheetNames, workbook };
+}
+
 function detectDelimiter(line: string): string {
   const counts: Record<string, number> = { ",": 0, ";": 0, "\t": 0 };
   let inQuote = false;

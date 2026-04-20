@@ -258,9 +258,18 @@
     "mapping": "Column Mapping",
     "preview": "Preview",
     "importing": "Importing",
-    "drag_drop": "Drag a CSV file here",
+    "drag_drop": "Drag a CSV or Excel file here",
     "file_loaded": "File loaded",
-    "rows_imported": "{{count}} rows imported"
+    "rows_imported": "{{count}} rows imported",
+    "ai_suggest": "AI Suggestions",
+    "ai_suggesting": "Analyzing columns...",
+    "ai_badge": "AI",
+    "normalized": "Value auto-normalized",
+    "original_value": "Original",
+    "select_sheet": "Select sheet",
+    "xlsx_supported": "CSV, XLSX and XLS supported",
+    "auto_normalize": "Auto-normalize data",
+    "all_mapped": "All columns are already mapped"
   },
   "tutorial": {
     "title": "Tutorial",
