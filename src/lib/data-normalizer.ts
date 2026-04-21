@@ -23,6 +23,7 @@ const NUMBER_FIELD_KEYS = new Set([
   "final_price",
   "quoted_price",
 ]);
+const CATEGORY_FIELD_KEYS = new Set(["category", "service_type", "type"]);
 
 // Provider category synonyms (lowercased, accent-stripped) → enum value.
 // Covers IT / EN / ES variants a concierge manager is likely to type.
@@ -253,6 +254,7 @@ export function normalizeRow(
     else if (PHONE_FIELD_KEYS.has(key)) result = normalizePhone(val, defaultCountry);
     else if (EMAIL_FIELD_KEYS.has(key)) result = normalizeEmail(val);
     else if (NUMBER_FIELD_KEYS.has(key)) result = normalizeNumber(val);
+    else if (CATEGORY_FIELD_KEYS.has(key)) result = normalizeCategory(val);
 
     if (result && result.changed) {
       changes[key] = val;
