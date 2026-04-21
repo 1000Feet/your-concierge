@@ -270,6 +270,11 @@ const Providers = () => {
           { key: "phone", label: t("common.phone") },
           { key: "reliability", label: t("providers.reliability") },
           { key: "commission_pct", label: t("providers.commission_pct") },
+          { key: "website", label: t("providers.website") },
+          { key: "instagram", label: "Instagram" },
+          { key: "facebook", label: "Facebook" },
+          { key: "tiktok", label: "TikTok" },
+          { key: "notes", label: t("common.notes") },
         ]}
         requiredKeys={["name"]}
         onImport={async (rows) => {
