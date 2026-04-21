@@ -23,6 +23,88 @@ const NUMBER_FIELD_KEYS = new Set([
   "final_price",
   "quoted_price",
 ]);
+const CATEGORY_FIELD_KEYS = new Set(["category", "service_type", "type"]);
+
+// Provider category synonyms (lowercased, accent-stripped) → enum value.
+// Covers IT / EN / ES variants a concierge manager is likely to type.
+const CATEGORY_SYNONYMS: Record<string, string> = {
+  // tour
+  tour: "tour", tours: "tour", "tour guide": "tour", guida: "tour", guide: "tour",
+  "guida turistica": "tour", excursion: "tour", excursions: "tour", escursione: "tour",
+  escursioni: "tour", excursion_guide: "tour", visita: "tour", visite: "tour",
+  "tour operator": "tour", "tour operators": "tour",
+  // chef
+  chef: "chef", cuoco: "chef", cuoca: "chef", cocinero: "chef", cook: "chef",
+  "private chef": "chef", "chef privato": "chef", "personal chef": "chef",
+  catering: "chef", caterer: "chef",
+  // transfer
+  transfer: "transfer", transfers: "transfer", ncc: "transfer", taxi: "transfer",
+  driver: "transfer", autista: "transfer", chauffeur: "transfer",
+  "car service": "transfer", traslado: "transfer", trasferimento: "transfer",
+  shuttle: "transfer", limo: "transfer", limousine: "transfer",
+  // yacht
+  yacht: "yacht", barca: "yacht", boat: "yacht", "boat charter": "yacht",
+  "yacht charter": "yacht", noleggio: "yacht", "noleggio barca": "yacht",
+  vela: "yacht", sailing: "yacht", sail: "yacht", catamaran: "yacht",
+  catamarano: "yacht", crociera: "yacht", cruise: "yacht",
+  // surf
+  surf: "surf", surfing: "surf", "surf lesson": "surf", "lezione surf": "surf",
+  "surf school": "surf", "scuola surf": "surf", windsurf: "surf",
+  paddle: "surf", sup: "surf", kitesurf: "surf",
+  // babysitter
+  babysitter: "babysitter", "baby sitter": "babysitter", baby: "babysitter",
+  nanny: "babysitter", tata: "babysitter", niñera: "babysitter", ninera: "babysitter",
+  childcare: "babysitter", "child care": "babysitter",
+  // restaurant
+  restaurant: "restaurant", ristorante: "restaurant", restaurante: "restaurant",
+  resto: "restaurant", trattoria: "restaurant", osteria: "restaurant",
+  pizzeria: "restaurant", food: "restaurant", dining: "restaurant",
+  // wellness
+  wellness: "wellness", spa: "wellness", massage: "wellness", massaggio: "wellness",
+  masaje: "wellness", benessere: "wellness", yoga: "wellness", pilates: "wellness",
+  beauty: "wellness", estetica: "wellness", "personal trainer": "wellness",
+  fitness: "wellness", gym: "wellness", palestra: "wellness",
+  // other (explicit fallbacks)
+  other: "other", altro: "other", otro: "other", misc: "other", various: "other",
+};
+
+const VALID_CATEGORIES = new Set([
+  "tour", "chef", "transfer", "yacht", "surf",
+  "babysitter", "restaurant", "wellness", "other",
+]);
+
+function stripAccents(s: string) {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/** Map free-text category labels (any language) to provider_category enum. */
+export function normalizeCategory(input: string): NormalizeResult {
+  const original = input ?? "";
+  const v = original.trim();
+  if (!v) return { value: "other", changed: original !== "other" };
+
+  const norm = stripAccents(v.toLowerCase()).replace(/[._\-/]+/g, " ").replace(/\s+/g, " ").trim();
+
+  // Direct enum match
+  if (VALID_CATEGORIES.has(norm)) {
+    return { value: norm, changed: norm !== original };
+  }
+
+  // Direct synonym table
+  if (CATEGORY_SYNONYMS[norm]) {
+    return { value: CATEGORY_SYNONYMS[norm], changed: true };
+  }
+
+  // Substring match: try every synonym key against the input
+  for (const [key, target] of Object.entries(CATEGORY_SYNONYMS)) {
+    if (norm.includes(key) || key.includes(norm)) {
+      return { value: target, changed: true };
+    }
+  }
+
+  // Fallback: keep "other"
+  return { value: "other", changed: original.toLowerCase() !== "other" };
+}
 
 function pad(n: number) {
   return n < 10 ? `0${n}` : `${n}`;
@@ -172,6 +254,7 @@ export function normalizeRow(
     else if (PHONE_FIELD_KEYS.has(key)) result = normalizePhone(val, defaultCountry);
     else if (EMAIL_FIELD_KEYS.has(key)) result = normalizeEmail(val);
     else if (NUMBER_FIELD_KEYS.has(key)) result = normalizeNumber(val);
+    else if (CATEGORY_FIELD_KEYS.has(key)) result = normalizeCategory(val);
 
     if (result && result.changed) {
       changes[key] = val;
