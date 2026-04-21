@@ -274,10 +274,19 @@ const Providers = () => {
         requiredKeys={["name"]}
         onImport={async (rows) => {
           for (const row of rows) {
+            // Category is already normalized by ImportDialog (data-normalizer).
+            // Validate it matches the enum before insert; otherwise default to "other".
+            const validCats = ["tour","chef","transfer","yacht","surf","babysitter","restaurant","wellness","other"] as const;
+            const cat = (validCats as readonly string[]).includes(row.category)
+              ? (row.category as ProviderCategory)
+              : ("other" as ProviderCategory);
             await supabase.from("providers").insert({
-              name: row.name, category: (row.category as ProviderCategory) || "other",
+              name: row.name, category: cat,
               email: row.email || null, phone: row.phone || null,
               reliability: parseInt(row.reliability) || 5, commission_pct: parseFloat(row.commission_pct) || 0,
+              website: row.website || null, instagram: row.instagram || null,
+              facebook: row.facebook || null, tiktok: row.tiktok || null,
+              notes: row.notes || null,
               user_id: user!.id,
             });
           }
