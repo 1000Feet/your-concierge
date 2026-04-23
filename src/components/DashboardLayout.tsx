@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center justify-between border-b bg-card px-4">
             <SidebarTrigger className="mr-4" />
             <div className="flex items-center gap-1">
+              <LanguageToggle />
               <ThemeToggle />
               <NotificationBell />
             </div>
